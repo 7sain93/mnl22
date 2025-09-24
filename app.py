@@ -11,6 +11,12 @@ def sidebar_menu():
         st.page_link("app.py#calc", label="📊 Calculator", icon="📊")
         st.page_link("app.py#reports", label="📑 Reports", icon="📑")
         st.page_link("app.py#logout", label="🚪 Logout", icon="🚪")
+        # --- USERS (simple, hard-coded) ---
+# يمكنك تعديل / إضافة يوزرات هنا بسهولة
+USERS = {
+    "admin": {"password": "admin123", "role": "admin"},
+    "user1": {"password": "user123", "role": "user"}
+}
 
 # --- صفحة تسجيل الدخول
 def login_page():
