@@ -3,6 +3,33 @@ import streamlit as st
 # إعداد الصفحة
 st.set_page_config(page_title="Our Calculator", page_icon="🧮", layout="centered")
 
+# ستايل CSS للتوسيط والتكبير
+st.markdown("""
+    <style>
+    .block-container {
+        max-width: 700px;
+        margin: auto;
+        padding-top: 50px;
+    }
+    h2 {
+        text-align: center;
+        font-size: 32px !important;
+    }
+    .stTextInput>div>div>input {
+        text-align: center;
+        font-size: 20px !important;
+        height: 50px !important;
+    }
+    .stButton>button {
+        display: block;
+        margin: auto;
+        font-size: 20px !important;
+        height: 60px !important;
+        width: 60%;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
 # الحالة العامة
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
@@ -15,13 +42,38 @@ if "calculation" not in st.session_state:
 if "history" not in st.session_state:
     st.session_state.history = []
 
+# سايد منيو
+with st.sidebar:
+    st.title("📌 Menu")
+    if st.session_state.logged_in:
+        if st.button("🏠 Home"):
+            st.session_state.page = "select"
+        if st.button("📊 Reports"):
+            st.write("Reports section (Admin only)")
+        if st.button("🎨 Design"):
+            st.write("Design settings")
+        if st.button("📞 Support"):
+            st.write("Call: 07725406386")
+        if st.button("🚪 Logout"):
+            st.session_state.logged_in = False
+            st.session_state.page = "login"
+            st.experimental_rerun()
+
 # تسجيل الدخول
 if st.session_state.page == "login":
-    st.markdown("<h2 style='text-align:center;'>🔐 Login</h2>", unsafe_allow_html=True)
+    st.markdown("<h2>🔐 Login</h2>", unsafe_allow_html=True)
     username = st.text_input("Username", key="login_user")
     password = st.text_input("Password", type="password", key="login_pass")
 
-    if st.button("Login") or (username == "user" and password == "123" and st.session_state.get("enter_pressed")):
+    if st.text_input("Press Enter to Login", value="", key="login_enter"):
+        if username == "user" and password == "123":
+            st.session_state.logged_in = True
+            st.session_state.page = "select"
+            st.experimental_rerun()
+        else:
+            st.error("❌ Invalid credentials")
+
+    if st.button("Login"):
         if username == "user" and password == "123":
             st.session_state.logged_in = True
             st.session_state.page = "select"
@@ -31,7 +83,7 @@ if st.session_state.page == "login":
 
 # اختيار المادة
 elif st.session_state.page == "select":
-    st.markdown("<h2 style='text-align:center;'>Select Material</h2>", unsafe_allow_html=True)
+    st.markdown("<h2>Select Material</h2>", unsafe_allow_html=True)
     if st.button("🌲 WOOD"):
         st.session_state.material = "WOOD"
         st.session_state.page = "input"
@@ -51,10 +103,11 @@ elif st.session_state.page == "select":
 
 # إدخال الوزن/العدد
 elif st.session_state.page == "input":
-    st.markdown(f"<h2 style='text-align:center;'>Enter {st.session_state.material}</h2>", unsafe_allow_html=True)
-    value = st.text_input("Enter value:", key="input_value")
+    st.markdown(f"<h2>Enter {st.session_state.material}</h2>", unsafe_allow_html=True)
+    value = st.text_input("Enter value:")
 
-    if st.button("Calculate") or (value and st.session_state.get("enter_pressed")):
+    # الضغط على Enter يحسب مباشرة
+    if value:
         try:
             num = float(value)
             result = {}
@@ -85,7 +138,7 @@ elif st.session_state.page == "input":
 # صفحة النتيجة
 elif st.session_state.page == "result":
     data = st.session_state.calculation
-    st.markdown(f"<h2 style='text-align:center;'>{data['material']} Result</h2>", unsafe_allow_html=True)
+    st.markdown(f"<h2>{data['material']} Result</h2>", unsafe_allow_html=True)
 
     if "trucks" in data:
         st.write(f"**Trucks:** {data['trucks']} 🚛")
@@ -102,11 +155,3 @@ elif st.session_state.page == "result":
     if st.button("↩️ Back"):
         st.session_state.page = "input"
         st.experimental_rerun()
-
-# عرض التاريخ
-if st.session_state.history:
-    st.subheader("📜 Saved History")
-    for i, h in enumerate(st.session_state.history, 1):
-        trucks = h.get("trucks", "")
-        qty = h.get("quantity", "")
-        st.write(f"{i}. {h['material']} → {trucks or qty} → {h['price']} IQD")
