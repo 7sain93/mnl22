@@ -53,28 +53,32 @@ with st.container():
 st.markdown("<div class='centered'>", unsafe_allow_html=True)
 st.title("🧮 Main Calculator")
 
-if st.button("🟤 Iron"):
-    tons = st.number_input("Enter weight (tons):", min_value=0, step=1)
-    if st.button("Calculate Iron"):
-        price = tons * 200
-        st.success(f"Price = {int(price)}")
+# Iron
+st.subheader("🟤 Iron")
+tons = st.number_input("Enter weight (tons):", min_value=0, step=1)
+if st.button("Calculate Iron"):
+    price = tons * 200
+    st.success(f"Price = {int(price)} IQD")
 
-if st.button("🚛 Trucks"):
-    trucks = st.number_input("Enter number of trucks:", min_value=0, step=1)
-    if st.button("Calculate Trucks"):
-        price = trucks * 1000
-        st.success(f"Price = {int(price)}")
+# Trucks
+st.subheader("🚛 Trucks")
+trucks = st.number_input("Enter number of trucks:", min_value=0, step=1)
+if st.button("Calculate Trucks"):
+    price = trucks * 1000
+    st.success(f"Price = {int(price)} IQD")
 
-if st.button("📦 Containers"):
-    containers = st.number_input("Enter number of containers:", min_value=0, step=1)
-    if st.button("Calculate Containers"):
-        price = containers * 500
-        st.success(f"Price = {int(price)}")
+# Containers
+st.subheader("📦 Containers")
+containers = st.number_input("Enter number of containers:", min_value=0, step=1)
+if st.button("Calculate Containers"):
+    price = containers * 500
+    st.success(f"Price = {int(price)} IQD")
 
-if st.button("🏗️ Raw Materials"):
-    models = st.number_input("Enter number of models:", min_value=0, step=1)
-    if st.button("Calculate Raw Materials"):
-        price = models * 700
-        st.success(f"Price = {int(price)}")
+# Raw Materials
+st.subheader("🏗️ Raw Materials")
+models = st.number_input("Enter number of models:", min_value=0, step=1)
+if st.button("Calculate Raw Materials"):
+    price = models * 75000
+    st.success(f"Price = {int(price)} IQD")
 
 st.markdown("</div>", unsafe_allow_html=True)
