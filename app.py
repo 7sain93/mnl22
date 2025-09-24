@@ -3,9 +3,10 @@ import streamlit as st
 # إعداد الصفحة
 st.set_page_config(page_title="Our Calculator", page_icon="🧮", layout="centered")
 
-# CSS للتوسيط وتكبير الحجم
+# CSS مخصص
 st.markdown("""
     <style>
+    /* توسيط */
     .block-container {
         max-width: 700px;
         margin: auto;
@@ -14,6 +15,7 @@ st.markdown("""
     h2 {
         text-align: center;
         font-size: 32px !important;
+        margin-bottom: 30px;
     }
     .stTextInput>div>div>input {
         text-align: center;
@@ -21,43 +23,82 @@ st.markdown("""
         height: 50px !important;
     }
     .stButton>button {
-        display: block;
-        margin: auto;
         font-size: 20px !important;
         height: 60px !important;
-        width: 60%;
+        width: 100%;
+        margin: 10px 0;
+        border-radius: 12px;
+    }
+    /* زر المنيو */
+    .menu-btn {
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        font-size: 30px;
+        cursor: pointer;
+        z-index: 1000;
+    }
+    /* المنيو الجانبي */
+    .sidemenu {
+        height: 100%;
+        width: 0;
+        position: fixed;
+        z-index: 1500;
+        top: 0;
+        left: 0;
+        background-color: #111;
+        overflow-x: hidden;
+        transition: 0.5s;
+        padding-top: 60px;
+    }
+    .sidemenu a {
+        padding: 12px 24px;
+        text-decoration: none;
+        font-size: 22px;
+        color: #f1f1f1;
+        display: block;
+        transition: 0.3s;
+    }
+    .sidemenu a:hover {
+        background-color: #575757;
+    }
+    .sidemenu .closebtn {
+        position: absolute;
+        top: 10px;
+        right: 25px;
+        font-size: 40px;
     }
     </style>
+
+    <script>
+    function openMenu() {
+        document.getElementById("mySidemenu").style.width = "250px";
+    }
+    function closeMenu() {
+        document.getElementById("mySidemenu").style.width = "0";
+    }
+    </script>
     """, unsafe_allow_html=True)
 
-# الحالة العامة
+# الحالة
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 if "page" not in st.session_state:
     st.session_state.page = "login"
-if "material" not in st.session_state:
-    st.session_state.material = None
-if "calculation" not in st.session_state:
-    st.session_state.calculation = None
-if "history" not in st.session_state:
-    st.session_state.history = []
 
 # سايد منيو يظهر فقط بعد تسجيل الدخول
 if st.session_state.logged_in:
-    with st.sidebar:
-        st.title("📌 Menu")
-        if st.button("🏠 Home"):
-            st.session_state.page = "select"
-        if st.button("📊 Reports"):
-            st.write("Reports section (Admin only)")
-        if st.button("🎨 Design"):
-            st.write("Design settings")
-        if st.button("📞 Support"):
-            st.write("Call: 07725406386")
-        if st.button("🚪 Logout"):
-            st.session_state.logged_in = False
-            st.session_state.page = "login"
-            st.experimental_rerun()
+    st.markdown('<span class="menu-btn" onclick="openMenu()">☰</span>', unsafe_allow_html=True)
+    st.markdown("""
+        <div id="mySidemenu" class="sidemenu">
+            <a href="javascript:void(0)" class="closebtn" onclick="closeMenu()">&times;</a>
+            <a onclick="window.location.reload()">🏠 Home</a>
+            <a>📊 Reports</a>
+            <a>🎨 Design</a>
+            <a>📞 Support</a>
+            <a onclick="window.location.reload()">🚪 Logout</a>
+        </div>
+    """, unsafe_allow_html=True)
 
 # تسجيل الدخول
 if st.session_state.page == "login":
@@ -65,8 +106,7 @@ if st.session_state.page == "login":
     username = st.text_input("Username")
     password = st.text_input("Password", type="password")
 
-    # الضغط على Enter أو زر Login
-    if st.button("Login") or (username == "user" and password == "123"):
+    if st.button("Login") or (username and password):
         if username == "user" and password == "123":
             st.session_state.logged_in = True
             st.session_state.page = "select"
@@ -74,22 +114,20 @@ if st.session_state.page == "login":
         elif username and password:
             st.error("❌ Invalid credentials")
 
-# باقي الصفحات تجي بعد تسجيل الدخول (select, input, result ...)
+# اختيار المواد
 elif st.session_state.page == "select":
     st.markdown("<h2>Select Material</h2>", unsafe_allow_html=True)
-    if st.button("🌲 WOOD"):
-        st.session_state.material = "WOOD"
-        st.session_state.page = "input"
-        st.experimental_rerun()
-    if st.button("🔩 IRON"):
-        st.session_state.material = "IRON"
-        st.session_state.page = "input"
-        st.experimental_rerun()
-    if st.button("📦 CONTAINER"):
-        st.session_state.material = "CONTAINER"
-        st.session_state.page = "input"
-        st.experimental_rerun()
-    if st.button("🏗️ RAW MATERIALS"):
-        st.session_state.material = "RAW MATERIALS"
-        st.session_state.page = "input"
-        st.experimental_rerun()
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("🌲 WOOD"):
+            st.write("Go to WOOD input page...")
+    with col2:
+        if st.button("🔩 IRON"):
+            st.write("Go to IRON input page...")
+    col3, col4 = st.columns(2)
+    with col3:
+        if st.button("📦 CONTAINER"):
+            st.write("Go to CONTAINER input page...")
+    with col4:
+        if st.button("🏗️ RAW MATERIALS"):
+            st.write("Go to RAW MATERIALS input page...")
