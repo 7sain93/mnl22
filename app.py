@@ -1,133 +1,157 @@
 import streamlit as st
+import math
 
-# إعداد الصفحة
-st.set_page_config(page_title="Our Calculator", page_icon="🧮", layout="centered")
+st.set_page_config(page_title="Calculator", page_icon="🧮", layout="centered")
 
-# CSS مخصص
-st.markdown("""
-    <style>
-    /* توسيط */
-    .block-container {
-        max-width: 700px;
-        margin: auto;
-        padding-top: 50px;
-    }
-    h2 {
-        text-align: center;
-        font-size: 32px !important;
-        margin-bottom: 30px;
-    }
-    .stTextInput>div>div>input {
-        text-align: center;
-        font-size: 20px !important;
-        height: 50px !important;
-    }
-    .stButton>button {
-        font-size: 20px !important;
-        height: 60px !important;
-        width: 100%;
-        margin: 10px 0;
-        border-radius: 12px;
-    }
-    /* زر المنيو */
-    .menu-btn {
-        position: fixed;
-        top: 20px;
-        left: 20px;
-        font-size: 30px;
-        cursor: pointer;
-        z-index: 1000;
-    }
-    /* المنيو الجانبي */
-    .sidemenu {
-        height: 100%;
-        width: 0;
-        position: fixed;
-        z-index: 1500;
-        top: 0;
-        left: 0;
-        background-color: #111;
-        overflow-x: hidden;
-        transition: 0.5s;
-        padding-top: 60px;
-    }
-    .sidemenu a {
-        padding: 12px 24px;
-        text-decoration: none;
-        font-size: 22px;
-        color: #f1f1f1;
-        display: block;
-        transition: 0.3s;
-    }
-    .sidemenu a:hover {
-        background-color: #575757;
-    }
-    .sidemenu .closebtn {
-        position: absolute;
-        top: 10px;
-        right: 25px;
-        font-size: 40px;
-    }
-    </style>
-
-    <script>
-    function openMenu() {
-        document.getElementById("mySidemenu").style.width = "250px";
-    }
-    function closeMenu() {
-        document.getElementById("mySidemenu").style.width = "0";
-    }
-    </script>
-    """, unsafe_allow_html=True)
-
-# الحالة
-if "logged_in" not in st.session_state:
-    st.session_state.logged_in = False
+# ----------------------------
+# إعداد الحالة
+# ----------------------------
 if "page" not in st.session_state:
     st.session_state.page = "login"
+if "logged_in" not in st.session_state:
+    st.session_state.logged_in = False
+if "role" not in st.session_state:
+    st.session_state.role = "user"  # user or admin
 
-# سايد منيو يظهر فقط بعد تسجيل الدخول
-if st.session_state.logged_in:
-    st.markdown('<span class="menu-btn" onclick="openMenu()">☰</span>', unsafe_allow_html=True)
-    st.markdown("""
-        <div id="mySidemenu" class="sidemenu">
-            <a href="javascript:void(0)" class="closebtn" onclick="closeMenu()">&times;</a>
-            <a onclick="window.location.reload()">🏠 Home</a>
-            <a>📊 Reports</a>
-            <a>🎨 Design</a>
-            <a>📞 Support</a>
-            <a onclick="window.location.reload()">🚪 Logout</a>
-        </div>
-    """, unsafe_allow_html=True)
+# ----------------------------
+# دوال الحساب
+# ----------------------------
+def calc_wood(weight):
+    trucks = math.ceil(weight / 40) if weight > 0 else 1
+    price = trucks * 200_000
+    return trucks, price
 
+def calc_iron(weight):
+    trucks = math.ceil(weight / 40) if weight > 0 else 1
+    price = trucks * 150_000
+    return trucks, price
+
+def calc_container(num):
+    price = num * 200_000
+    return num, price
+
+def calc_raw(num):
+    price = num * 75_000
+    return num, price
+
+# ----------------------------
+# سايد منيو
+# ----------------------------
+with st.sidebar:
+    if st.session_state.logged_in:
+        st.title("☰ Menu")
+        st.toggle("Dark mode")  # مجرد placeholder
+        support = st.selectbox("Support", ["Choose", "Call", "WhatsApp"])
+        if st.button("Logout"):
+            st.session_state.page = "login"
+            st.session_state.logged_in = False
+            st.rerun()
+        # صلاحيات الادمن
+        if st.session_state.role == "admin":
+            st.write("---")
+            st.subheader("Admin Options")
+            st.button("Create User")
+            st.button("Reports")
+            st.button("Analytics")
+
+# ----------------------------
 # تسجيل الدخول
+# ----------------------------
 if st.session_state.page == "login":
-    st.markdown("<h2>🔐 Login</h2>", unsafe_allow_html=True)
-    username = st.text_input("Username")
-    password = st.text_input("Password", type="password")
+    st.title("Login")
+    username = st.text_input("Username", "")
+    password = st.text_input("Password", "", type="password")
 
-    if st.button("Login") or (username and password):
+    if st.button("Login") or st.session_state.get("enter_pressed") == "login":
         if username == "user" and password == "123":
             st.session_state.logged_in = True
+            st.session_state.role = "admin"  # مثال نخلي user هو admin
             st.session_state.page = "select"
-            st.experimental_rerun()
-        elif username and password:
-            st.error("❌ Invalid credentials")
+            st.rerun()
+        else:
+            st.error("Invalid credentials")
 
+# ----------------------------
 # اختيار المواد
+# ----------------------------
 elif st.session_state.page == "select":
-    st.markdown("<h2>Select Material</h2>", unsafe_allow_html=True)
-    col1, col2 = st.columns(2)
-    with col1:
-        if st.button("🌲 WOOD"):
-            st.write("Go to WOOD input page...")
-    with col2:
-        if st.button("🔩 IRON"):
-            st.write("Go to IRON input page...")
-    col3, col4 = st.columns(2)
-    with col3:
-        if st.button("📦 CONTAINER"):
-            st.write("Go to CONTAINER input page...")
-    with col4:
-        if st.button("🏗️ RAW MATERIALS"):
-            st.write("Go to RAW MATERIALS input page...")
+    st.title("WELCOME TO OUR CALCULATOR!")
+    st.write("Choose a material:")
+    if st.button("WOOD") or st.session_state.get("enter_pressed") == "wood":
+        st.session_state.page = "wood_input"
+        st.rerun()
+    if st.button("IRON") or st.session_state.get("enter_pressed") == "iron":
+        st.session_state.page = "iron_input"
+        st.rerun()
+    if st.button("CONTAINER") or st.session_state.get("enter_pressed") == "container":
+        st.session_state.page = "container_input"
+        st.rerun()
+    if st.button("RAW MATERIALS") or st.session_state.get("enter_pressed") == "raw":
+        st.session_state.page = "raw_input"
+        st.rerun()
+
+# ----------------------------
+# WOOD
+# ----------------------------
+elif st.session_state.page == "wood_input":
+    st.title("WOOD")
+    weight = st.number_input("Enter weight in tons:", min_value=0.0, format="%.2f")
+    if st.button("Calculate") or st.session_state.get("enter_pressed") == "wood_calc":
+        trucks, price = calc_wood(weight)
+        st.session_state.result = (trucks, price, "WOOD")
+        st.session_state.page = "result"
+        st.rerun()
+
+# ----------------------------
+# IRON
+# ----------------------------
+elif st.session_state.page == "iron_input":
+    st.title("IRON")
+    weight = st.number_input("Enter weight in tons:", min_value=0.0, format="%.2f")
+    if st.button("Calculate") or st.session_state.get("enter_pressed") == "iron_calc":
+        trucks, price = calc_iron(weight)
+        st.session_state.result = (trucks, price, "IRON")
+        st.session_state.page = "result"
+        st.rerun()
+
+# ----------------------------
+# CONTAINER
+# ----------------------------
+elif st.session_state.page == "container_input":
+    st.title("CONTAINER")
+    num = st.number_input("Enter number of containers:", min_value=0, step=1)
+    if st.button("Calculate") or st.session_state.get("enter_pressed") == "container_calc":
+        count, price = calc_container(num)
+        st.session_state.result = (count, price, "CONTAINER")
+        st.session_state.page = "result"
+        st.rerun()
+
+# ----------------------------
+# RAW MATERIALS
+# ----------------------------
+elif st.session_state.page == "raw_input":
+    st.title("RAW MATERIALS")
+    num = st.number_input("Enter number of models:", min_value=0, step=1)
+    if st.button("Calculate") or st.session_state.get("enter_pressed") == "raw_calc":
+        count, price = calc_raw(num)
+        st.session_state.result = (count, price, "RAW MATERIALS")
+        st.session_state.page = "result"
+        st.rerun()
+
+# ----------------------------
+# صفحة النتيجة
+# ----------------------------
+elif st.session_state.page == "result":
+    count, price, material = st.session_state.result
+    st.title("Result")
+    st.write(f"**Material:** {material}")
+    if material in ["WOOD", "IRON"]:
+        st.write(f"Trucks: **{count}**")
+    else:
+        st.write(f"Count: **{count}**")
+    st.write(f"Total Price: **{price:,} IQD**")
+
+    if st.button("✅ Save"):
+        st.success("Saved successfully!")
+        st.session_state.page = "select"
+        st.rerun()
